@@ -6,6 +6,7 @@ import {
   text,
   timestamp,
   uniqueIndex,
+  index,
 } from 'drizzle-orm/pg-core';
 import { start } from 'repl';
  
@@ -40,13 +41,14 @@ export const WorkHistory = pgTable(
   },
   (workHistory) => {
     return {
-      nannyWorkHistoryIdx: uniqueIndex('nannyWorkHistoryIdx').on(workHistory.nannyId),
+      nannyWorkHistoryIdx: index('nannyWorkHistoryIdx').on(workHistory.nannyId),
     };
   },
 );
 
-export const Recommandations = pgTable(
-  'recommdandations',
+export const Recommendations = pgTable(
+  'recommendations',
+  
   {
     id: serial('id').primaryKey(),
     nannyId: serial('nannyId').notNull(),
@@ -55,9 +57,9 @@ export const Recommandations = pgTable(
     text: text('text').notNull(),
     rating: serial('rating').notNull(),
   },
-  (recommandations) => {
+  (recommendations) => {
     return {
-      nannyRecommandationIdx: uniqueIndex('nannyRecommandationIdx').on(recommandations.nannyId)
+      nannyRecommendationsIdx: index('nannyRecommendationsIdx').on(recommendations.nannyId)
     };
   }
 );
