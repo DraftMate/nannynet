@@ -4,30 +4,6 @@ import { Recommendations } from '../../../drizzle/schema';
 import { NextRequest, NextResponse } from 'next/server';
 import { eq } from 'drizzle-orm';
 
-export async function POST(request: NextRequest) {
-  try {
-    const body = await request.json();
-    const newRecommendation = await db
-      .insert(Recommendations)
-      .values({
-        nannyId: body.nannyId,
-        customerName: body.customerName,
-        customerEmail: body.customerEmail,
-        text: body.text,
-        rating: body.rating
-      })
-      .returning();
-
-    return NextResponse.json(newRecommendation[0], { status: 201 });
-  } catch (error) {
-    console.error('Error creating recommendation:', error);
-    return NextResponse.json(
-      { error: 'Failed to create recommendation' }, 
-      { status: 500 }
-    );
-  }
-}
-
 export async function GET(request: NextRequest) {
   try {
     // Optional: filter by nannyId if provided as a query parameter
@@ -53,3 +29,28 @@ export async function GET(request: NextRequest) {
     );
   }
 }
+
+export async function POST(request: NextRequest) {
+  try {
+    const body = await request.json();
+    const newRecommendation = await db
+      .insert(Recommendations)
+      .values({
+        nannyId: body.nannyId,
+        customerName: body.customerName,
+        customerEmail: body.customerEmail,
+        text: body.text,
+        rating: body.rating
+      })
+      .returning();
+
+    return NextResponse.json(newRecommendation[0], { status: 201 });
+  } catch (error) {
+    console.error('Error creating recommendation:', error);
+    return NextResponse.json(
+      { error: 'Failed to create recommendation' }, 
+      { status: 500 }
+    );
+  }
+}
+
