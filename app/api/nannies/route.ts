@@ -1,8 +1,10 @@
 // src/app/api/nannies/route.ts
 import { db } from '../../../drizzle/db';
-import { NannyTable } from '../../../drizzle/schema';
+import { NannyTable, WorkHistory, Recommendations } from '../../../drizzle/schema';
 import { NextRequest, NextResponse } from 'next/server';
+import {eq} from 'drizzle-orm'
 
+// Get all nannies
 export async function GET() {
   try {
     const nannies = await db.select().from(NannyTable);
@@ -38,4 +40,5 @@ export async function POST(request: NextRequest) {
     );
   }
 }
+
 

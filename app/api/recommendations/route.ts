@@ -6,20 +6,7 @@ import { eq } from 'drizzle-orm';
 
 export async function GET(request: NextRequest) {
   try {
-    // Optional: filter by nannyId if provided as a query parameter
-    const { searchParams } = new URL(request.url);
-    const nannyId = searchParams.get('nannyId');
-
-    let recommendations;
-    if (nannyId) {
-      recommendations = await db
-        .select()
-        .from(Recommendations)
-        .where(eq(Recommendations.nannyId, parseInt(nannyId)));
-    } else {
-      recommendations = await db.select().from(Recommendations);
-    }
-
+    const recommendations = await db.select().from(Recommendations);
     return NextResponse.json(recommendations);
   } catch (error) {
     console.error('Error fetching recommendations:', error);

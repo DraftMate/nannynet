@@ -41,7 +41,7 @@ class NannyNetClient {
         }
     }
 
-    async fetch(url: string) {
+    async jsonFetch(url: string) {
         try {
             const response = await fetch(`${this.host}${url}`, {
                 method: 'GET',
@@ -73,7 +73,7 @@ class NannyNetClient {
     }
 
     async fetchNannies() {
-        const nannies: Nanny[] = await this.fetch('/nanny')
+        const nannies: Nanny[] = await this.jsonFetch('/nannies')
         console.log(nannies)
         nannies.forEach(nanny => this.nannyTypeCheck(nanny))
         
@@ -103,8 +103,16 @@ class NannyNetClient {
         if(nannyId == null) {
             throw new DataParserError('no nanny id found', {property: 'nannyId', value: nannyId})
         }
-       const workHistory = await this.fetch(`/work-history/${nannyId}`)
-       if(workHistory.id == null) {
+        const params = {
+            nannyId: nannyId
+        }
+        const workHistories: workHistory[] = await this.jsonFetch(`/nannies/${nannyId}/work-history`)
+        workHistories.forEach(workHistory => this.workHistoryTypeChecker(workHistory))
+        return workHistories
+    }
+    
+    workHistoryTypeChecker(workHistory: workHistory) {
+        if(workHistory.id == null) {
             throw new DataParserError('no id found', {property: 'id', value: workHistory.id})
         }  
         if(workHistory.jobTitle == null) {
@@ -113,30 +121,33 @@ class NannyNetClient {
         if(workHistory.startDate == null) {
             throw new DataParserError('no start date found', {property: 'startDate', value: workHistory.startDate})
         }
-        return workHistory
     }
 
     async fetchRecommendations(nannyId: number) {
-        const recommendations = await this.fetch(`/recommendations/${nannyId}`)
         if(nannyId == null) {
             throw new DataParserError('no nanny id found')
         }
-        if(recommendations.id == null) {
-            throw new DataParserError('no id found', {property: 'id', value: recommendations.id})
-        }
-        if(recommendations.customerName == null) {
-            throw new DataParserError('no customer name found', {property: 'customerName', value: recommendations.customerName})
-        }
-        if(recommendations.customerEmail == null) {
-            throw new DataParserError('no customer email found', {property: 'customerEmail', value: recommendations.customerEmail})
-        }
-        if(recommendations.text == null) {
-            throw new DataParserError('no text found', {property: 'text', value: recommendations.text})
-        }
-        if(recommendations.rating == null) {
-            throw new DataParserError('no rating found', {property: 'rating', value: recommendations.rating})
-        }
+        const recommendations: Recommendations[] = await this.jsonFetch(`/nannies/${nannyId}/recommendations`)
+        recommendations.forEach(recommendation => this.recommendationTypeChecker(recommendation))
         return recommendations
+    }
+
+    recommendationTypeChecker(recommendation: Recommendations) {
+        if(recommendation.id == null) {
+            throw new DataParserError('no id found', {property: 'id', value: recommendation.id})
+        }
+        if(recommendation.customerName == null) {
+            throw new DataParserError('no customer name found', {property: 'customerName', value: recommendation.customerName})
+        }
+        if(recommendation.customerEmail == null) {
+            throw new DataParserError('no customer email found', {property: 'customerEmail', value: recommendation.customerEmail})
+        }
+        if(recommendation.text == null) {
+            throw new DataParserError('no text found', {property: 'text', value: recommendation.text})
+        }
+        if(recommendation.rating == null) {
+            throw new DataParserError('no rating found', {property: 'rating', value: recommendation.rating})
+        }
     }
 }
 

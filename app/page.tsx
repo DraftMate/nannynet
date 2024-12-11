@@ -5,11 +5,29 @@ import nannyNetClient, { Nanny, workHistory, Recommendations } from '@/lib/api-c
 
 export default function NannyManagementPage() {
   const [nannies, setNannyData] = useState([] as Nanny[])
-  const [workHistories, setWorkHistories] = useState([])
-  const [recommendations, setRecommendations] = useState([])
+  const [workHistories, setWorkHistories] = useState([] as workHistory[])
+  const [recommendations, setRecommendations] = useState([] as Recommendations[])
   const [isLoading, setIsLoading] = useState(true)
+  const [selectedNanny, setSelectedNanny] = useState(true)
 
-
+  async function fetchWorkHistories(nannyId: number) {
+    try {
+      const workHistory: workHistory[] = await nannyNetClient.fetchWorkHistory(nannyId)
+      console.log(workHistory)
+      setWorkHistories(workHistory)
+      setSelectedNanny(true)
+    } catch (error) {
+      console.log(error)
+    }
+  }
+  async function fetchRecommendations(nannyId: number) {
+    try {
+      const recommendations: Recommendations[] = await nannyNetClient.fetchRecommendations(nannyId)
+      setRecommendations(recommendations)
+    } catch (error) {
+      console.log(error)
+    }
+  }
 
   useEffect(() => {
 
@@ -38,7 +56,7 @@ export default function NannyManagementPage() {
       ) : (
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
           {nannies.map((nanny) => (
-            <Card key={nanny.id} className="w-full">
+            <Card key={nanny.id} className="w-full" onClick={() => { fetchWorkHistories(nanny.id); fetchRecommendations(nanny.id) }}>
               <CardHeader>
                 <CardTitle>{`${nanny.firstName} ${nanny.lastName}`}</CardTitle>
               </CardHeader>
@@ -51,6 +69,39 @@ export default function NannyManagementPage() {
           ))}
         </div>
       )}
+      {
+        workHistories.length === 0 ? (
+          <p>No work history found.</p>
+        ) : (
+          <div>
+            <h2 className="font-bold">Work History</h2>
+            {workHistories.map((workHistory) => (
+              <div key={workHistory.id}>
+                <p>Job Title: {workHistory.jobTitle}</p>
+                {workHistory.description && <p>Description: {workHistory.description}</p>}
+                <h2>StartDate: {workHistory.startDate} EndDate: {workHistory.endDate ? workHistory.endDate : "-"}</h2>
+              </div>
+            ))}
+          </div>
+        )
+      }
+      {
+        recommendations.length === 0 ? (
+          <p>No recommendations found.</p>
+        ) : (
+          <div>
+            <h2 className="font-bold">Recommendations</h2>
+            {recommendations.map((recommendation) => (
+              <div key={recommendation.id}>
+                <p>Review by {recommendation.customerName}</p>
+                <p>{recommendation.customerEmail}</p>
+                <p>{recommendation.text}</p>
+                <p>Rating: {recommendation.rating}</p>
+              </div>
+            ))}
+          </div>
+        )
+      }
     </div>
   )
 
