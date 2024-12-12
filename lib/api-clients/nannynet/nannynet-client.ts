@@ -1,3 +1,5 @@
+/// <reference lib="dom" />
+
 // import ApiClient, { InvalidResponseError, StatusCodeError } from 'simple-api-client';
 import BaseError from '@/lib/base-error'
 
@@ -5,26 +7,29 @@ class StatusCodeError extends BaseError<{status: number, url: string}> {}
 class NetworkError extends BaseError<{ url: string }> {}
 class JSONParseError extends BaseError<{ bodyText?: string }> {}
 class DataParserError extends BaseError<{ property: string, value: any }> {}
+class RegistrationError extends BaseError<{ email: string }> {}
+
 
 export interface Nanny {
-    id: number,
+    id?: string,
     firstName: string,
     lastName: string,
     email: string,
     yearsOfExperience: number
+    password: string
     createdAt: Date
 }
 export interface workHistory {
-    id: number
-    nannyId: number;
+    id?: number
+    nannyId: string;
     jobTitle: string;
     description?: string;
     startDate: string;
     endDate?: string;
 }
 export interface Recommendations {
-    id: number;
-    nannyId: number;
+    id?: number;
+    nannyId: string;
     customerName: string;
     customerEmail: string;
     text: string;
@@ -34,18 +39,34 @@ export interface Recommendations {
 class NannyNetClient {
     host: string
     defaultHeaders: Headers
+    auth: {
+        accessToken: string
+        refreshToken: string
+    } | undefined
     constructor() {
         this.host = '/api';
         this.defaultHeaders = {
+            // @ts-ignore
             'Content-Type': 'application/json'
         }
+    }
+
+    getDefaultHeaders(): Headers {
+        if (this.auth) {
+            return {
+                ...this.defaultHeaders,
+                // @ts-ignore
+                'Authorization': `Bearer ${this.auth.accessToken}`
+            }
+        }
+        return this.defaultHeaders
     }
 
     async jsonFetch(url: string) {
         try {
             const response = await fetch(`${this.host}${url}`, {
                 method: 'GET',
-                headers: this.defaultHeaders
+                headers: this.getDefaultHeaders()
             })
             if(response.status == 200) {
                 // success
@@ -72,18 +93,47 @@ class NannyNetClient {
         }
     }
 
+    async jsonFetchPost(url: string, body: string) {
+        if(body == null) {
+            throw new DataParserError('no body found', {property: 'body', value: body})
+        }
+        try {
+            const response = await fetch(`${this.host}${url}`, {
+                method: 'POST',
+                headers: this.getDefaultHeaders(),
+                body: body
+            })
+            //Success
+            if(response.status == 201) {
+                return response.json()
+            }
+            if(response.status == 401) {
+                throw new Error('Unauthorized to call POST endpoint')
+            }
+            if(response.status == 500) {
+                throw new Error('POST ednpoint internal server error')
+            }
+        } catch(err) {
+            // network error
+            // TODO: retry
+            throw new NetworkError('network error', { url })
+        }
+    }
+
     async fetchNannies() {
         const nannies: Nanny[] = await this.jsonFetch('/nannies')
         console.log(nannies)
-        nannies.forEach(nanny => this.nannyTypeCheck(nanny))
+        nannies.forEach(nanny => {
+            if(nanny.id == null) {
+                throw new DataParserError('no id found', {property: 'id', value: nanny.id})
+            } 
+            this.nannyTypeCheck(nanny)
+        })
         
         return nannies
     }
 
     nannyTypeCheck(nanny: Nanny) {
-        if(nanny.id == null) {
-            throw new DataParserError('no id found', {property: 'id', value: nanny.id})
-        } 
         if(nanny.firstName == null) {
             throw new DataParserError('no first name found', {property: 'firstName', value: nanny.firstName})
         }
@@ -98,7 +148,7 @@ class NannyNetClient {
         }
     }
 
-    async fetchWorkHistory(nannyId: number) {
+    async fetchWorkHistory(nannyId: string) {
         // nannyId required to make request
         if(nannyId == null) {
             throw new DataParserError('no nanny id found', {property: 'nannyId', value: nannyId})
@@ -123,7 +173,7 @@ class NannyNetClient {
         }
     }
 
-    async fetchRecommendations(nannyId: number) {
+    async fetchRecommendations(nannyId: string) {
         if(nannyId == null) {
             throw new DataParserError('no nanny id found')
         }
@@ -149,9 +199,39 @@ class NannyNetClient {
             throw new DataParserError('no rating found', {property: 'rating', value: recommendation.rating})
         }
     }
+
+    async registerNanny(firstName: string, lastName: string, email: string, password: string, yearsOfExperience: number) {
+        const nanny: Nanny = {
+            firstName,
+            lastName,
+            email,
+            yearsOfExperience,
+            password,
+            createdAt: new Date()
+        }
+        //Check if nanny properties are valid
+        this.nannyTypeCheck(nanny)
+        //Check if email already exists
+        const response = await this.jsonFetch(`/nannies/email/${email}`)
+        if(response.length > 0) {
+            throw new DataParserError('email already exists', {property: 'email', value: email})
+        }
+
+        //Post nanny registration
+        const postResponse = await this.jsonFetchPost('/nannies', JSON.stringify(nanny))
+
+    }
+
+    async login(email: string, password: string) {
+        
+    }
+
 }
 
 // export singleton
 export default new NannyNetClient();
 
+export const login = async (email: string, password: string) => {
+
+}
 

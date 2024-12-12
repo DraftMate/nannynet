@@ -7,7 +7,7 @@ import { eq } from 'drizzle-orm';
 // Get recommendations by nanny ID
 export async function GET(request: NextRequest, {params}: {params: {id: string}}) {
   try {
-    const nannyId = Number(params.id)
+    const nannyId = params.id
 
     let recommendations;
     if (nannyId) {

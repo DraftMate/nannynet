@@ -10,7 +10,7 @@ export default function NannyManagementPage() {
   const [isLoading, setIsLoading] = useState(true)
   const [selectedNanny, setSelectedNanny] = useState(true)
 
-  async function fetchWorkHistories(nannyId: number) {
+  async function fetchWorkHistories(nannyId: string) {
     try {
       const workHistory: workHistory[] = await nannyNetClient.fetchWorkHistory(nannyId)
       console.log(workHistory)
@@ -20,7 +20,7 @@ export default function NannyManagementPage() {
       console.log(error)
     }
   }
-  async function fetchRecommendations(nannyId: number) {
+  async function fetchRecommendations(nannyId: string) {
     try {
       const recommendations: Recommendations[] = await nannyNetClient.fetchRecommendations(nannyId)
       setRecommendations(recommendations)
@@ -56,7 +56,7 @@ export default function NannyManagementPage() {
       ) : (
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
           {nannies.map((nanny) => (
-            <Card key={nanny.id} className="w-full" onClick={() => { fetchWorkHistories(nanny.id); fetchRecommendations(nanny.id) }}>
+            <Card key={nanny.id} className="w-full" onClick={() => { fetchWorkHistories(nanny.id!); fetchRecommendations(nanny.id!) }}>
               <CardHeader>
                 <CardTitle>{`${nanny.firstName} ${nanny.lastName}`}</CardTitle>
               </CardHeader>

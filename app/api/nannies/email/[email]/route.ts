@@ -7,28 +7,20 @@ import { eq } from 'drizzle-orm';
 // Get nanny by ID
 export async function GET(
     request: Request,
-    { params }: { params: { id: string } }
+    { params }: { params: { email: string } }
   ) {
     try {
       // Convert the ID to a number if your database uses numeric IDs
-      const nannyId = params.id
+      const nannyEmail = params.email
   
       // Query for a specific nanny by ID
       const nanny = await db
         .select()
         .from(NannyTable)
-        .where(eq(NannyTable.id, nannyId))
+        .where(eq(NannyTable.email, nannyEmail))
         .limit(1);
-  
-      // Check if nanny exists
-      if (nanny.length === 0) {
-        return NextResponse.json(
-          { error: 'Nanny not found' }, 
-          { status: 404 }
-        );
-      }
-  
-      return NextResponse.json(nanny[0], { status: 200 });
+        
+      return NextResponse.json(nanny, { status: 200 });
     } catch (error) {
       return NextResponse.json(
         { error: 'Failed to fetch nanny', details: error }, 

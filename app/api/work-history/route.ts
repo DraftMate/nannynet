@@ -15,7 +15,7 @@ export async function GET(request: NextRequest) {
       workHistories = await db
         .select()
         .from(WorkHistory)
-        .where(eq(WorkHistory.nannyId, parseInt(nannyId)));
+        .where(eq(WorkHistory.nannyId, nannyId))
     } else {
       throw new Error('Nanny ID is required')
     }

@@ -1,8 +1,7 @@
 // src/app/api/nannies/route.ts
-import { db } from '../../../drizzle/db';
-import { NannyTable, WorkHistory, Recommendations } from '../../../drizzle/schema';
+import { db } from '@/drizzle/db';
+import { NannyTable, WorkHistory, Recommendations } from '@/drizzle/schema';
 import { NextRequest, NextResponse } from 'next/server';
-import {eq} from 'drizzle-orm'
 
 // Get all nannies
 export async function GET() {
@@ -27,6 +26,7 @@ export async function POST(request: NextRequest) {
         firstName: body.firstName,
         lastName: body.lastName,
         email: body.email,
+        password: body.password,
         yearsOfExperience: body.yearsOfExperience
       })
       .returning();

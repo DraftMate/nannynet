@@ -7,18 +7,19 @@ import {
   timestamp,
   uniqueIndex,
   index,
+  uuid,
+  integer,
+  boolean,
 } from 'drizzle-orm/pg-core';
-import { start } from 'repl';
  
-export const db = drizzle(sql);
-
 export const NannyTable = pgTable(
   'nanny',
   {
-    id: serial('id').primaryKey(),
+    id: uuid('id').primaryKey().defaultRandom(),
     firstName: text('firstName').notNull(),
     lastName: text('lastName').notNull(),
     email: text('email').notNull(),
+    password: text('password').notNull(),
     yearsOfExperience: serial('yearsOfExperience').notNull(),
     createdAt: timestamp('createdAt').defaultNow().notNull(),
   },
@@ -33,7 +34,7 @@ export const WorkHistory = pgTable(
   'workHistory',
   {
     id: serial('id').primaryKey(),
-    nannyId: serial('nannyId').notNull(),
+    nannyId: uuid('nannyId').notNull(),
     jobTitle: text('jobTitle').notNull(),
     description: text('description'),
     startDate: timestamp('startDate').notNull(),
@@ -51,7 +52,7 @@ export const Recommendations = pgTable(
   
   {
     id: serial('id').primaryKey(),
-    nannyId: serial('nannyId').notNull(),
+    nannyId: uuid('nannyId').notNull(),
     customerName: text('customerName').notNull(),
     customerEmail: text('customerEmail').notNull(),
     text: text('text').notNull(),
@@ -63,3 +64,23 @@ export const Recommendations = pgTable(
     };
   }
 );
+
+export const AuthTable = pgTable(
+  'auth',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    nannyId: uuid('id').notNull().references(() => NannyTable.id, { onDelete: 'cascade' }),
+    email: text('email').notNull(),
+    refreshTokenVersion: integer('refreshTokenVersion').notNull(),
+    refreshToken: text('refreshToken').notNull(),
+    expiresAt: timestamp('expirationDate').notNull(),
+    createdAt: timestamp('createdAt').defaultNow().notNull(),
+    lastUsedAt: timestamp('lastUsedAt').notNull(),
+    isRevoked: boolean('isRevoked').notNull(),
+  },
+  (auth) => {
+    return {
+      nannyIdIdx: index('nannyIdIdx').on(auth.nannyId)
+    }
+  }
+)
