@@ -2,6 +2,7 @@
 
 // import ApiClient, { InvalidResponseError, StatusCodeError } from 'simple-api-client';
 import BaseError from '@/lib/base-error'
+// import { verifyPassword, hashPassword } from '@/lib/hash-password'
 
 class StatusCodeError extends BaseError<{status: number, url: string}> {}
 class NetworkError extends BaseError<{ url: string }> {}
@@ -62,10 +63,10 @@ class NannyNetClient {
         return this.defaultHeaders
     }
 
-    async jsonFetch(url: string) {
+    async jsonFetch(url: string, init: RequestInit = {method: 'GET'}) {
         try {
             const response = await fetch(`${this.host}${url}`, {
-                method: 'GET',
+                ...init,
                 headers: this.getDefaultHeaders()
             })
             if(response.status == 200) {
@@ -93,31 +94,12 @@ class NannyNetClient {
         }
     }
 
-    async jsonFetchPost(url: string, body: string) {
-        if(body == null) {
-            throw new DataParserError('no body found', {property: 'body', value: body})
-        }
-        try {
-            const response = await fetch(`${this.host}${url}`, {
-                method: 'POST',
-                headers: this.getDefaultHeaders(),
-                body: body
-            })
-            //Success
-            if(response.status == 201) {
-                return response.json()
-            }
-            if(response.status == 401) {
-                throw new Error('Unauthorized to call POST endpoint')
-            }
-            if(response.status == 500) {
-                throw new Error('POST ednpoint internal server error')
-            }
-        } catch(err) {
-            // network error
-            // TODO: retry
-            throw new NetworkError('network error', { url })
-        }
+    async jsonPost(url: string, body: {}, init: Omit<RequestInit, 'body' | 'method'> = {}) {
+        return this.jsonFetch(url, {
+            ...init,
+            method: 'POST',
+            body : JSON.stringify(body)
+        })
     }
 
     async fetchNannies() {
@@ -209,21 +191,33 @@ class NannyNetClient {
             password,
             createdAt: new Date()
         }
+        console.log(nanny)
         //Check if nanny properties are valid
-        this.nannyTypeCheck(nanny)
+        //this.nannyTypeCheck(nanny)
         //Check if email already exists
         const response = await this.jsonFetch(`/nannies/email/${email}`)
+        console.log(response)
         if(response.length > 0) {
             throw new DataParserError('email already exists', {property: 'email', value: email})
         }
+        try { 
+            return await this.jsonPost('/auth/register/', nanny)
+        }
+        catch(err) {
+            throw new DataParserError('error hashing password', {property: 'password', value: password})
+        }
 
-        //Post nanny registration
-        const postResponse = await this.jsonFetchPost('/nannies', JSON.stringify(nanny))
 
     }
 
     async login(email: string, password: string) {
-        
+        try {
+            const result = await this.jsonPost(`/auth/login/`, {email, password})
+            return result;
+        } catch(err) {
+            throw new DataParserError('Failed to login', {property: 'email', value: email})
+        }
+
     }
 
 }

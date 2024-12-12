@@ -1,22 +1,9 @@
-// src/app/api/nannies/route.ts
+// src/app/api/auth/register/route.ts
 import { db } from '@/drizzle/db';
-import { NannyTable, } from '@/drizzle/schema';
-import { NextRequest, NextResponse } from 'next/server';
+import { NannyTable } from '@/drizzle/schema';
+import { NextResponse, NextRequest } from 'next/server';
+import { eq } from 'drizzle-orm';
 import { hashPassword } from '@/lib/hash-password';
-
-// Get all nannies
-export async function GET() {
-  try {
-    const nannies = await db.select().from(NannyTable);
-    return NextResponse.json(nannies);
-  } catch (error) {
-    console.error('Error fetching nannies:', error);
-    return NextResponse.json(
-      { error: 'Failed to fetch nannies' }, 
-      { status: 500 }
-    );
-  }
-}
 
 export async function POST(request: NextRequest) {
   try {
@@ -33,7 +20,8 @@ export async function POST(request: NextRequest) {
         yearsOfExperience: body.yearsOfExperience
       })
       .returning();
-
+      
+    console.log(newNanny)
     return NextResponse.json(newNanny[0], { status: 201 });
   } catch (error) {
     console.error('Error creating nanny:', error);
@@ -43,5 +31,3 @@ export async function POST(request: NextRequest) {
     );
   }
 }
-
-

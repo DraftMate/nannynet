@@ -1,2 +1,14 @@
-import bcrypt from 'bcrypt'
+import bcrypt from 'bcrypt';
 
+const SALT_ROUNDS = 10; // Standard recommendation for balance of security and performance
+
+//Hash Password
+export async function hashPassword(password: string): Promise<string> {
+    const salt = await bcrypt.genSalt(SALT_ROUNDS)
+    return bcrypt.hash(password, salt)
+}
+
+//Verify Password
+export async function verifyPassword(password: string, hashedPassword: string): Promise<boolean> {
+    return bcrypt.compare(password, hashedPassword)
+}

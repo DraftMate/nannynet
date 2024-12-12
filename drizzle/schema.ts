@@ -26,6 +26,7 @@ export const NannyTable = pgTable(
   (nanny) => {
     return {
       nameIdx: uniqueIndex('nameIdx').on(nanny.firstName),
+      emailIdx: index('nannyEmailIdx').on(nanny.email),
     };
   },
 );

@@ -16,6 +16,12 @@ export default function RegistrationPage() {
 
     async function registerNanny(firstName: string, lastName: string, email: string, password: string, yearsOfExperience: number) {
         try {
+            if (firstName == '' || lastName == '' || email == '' || password == '') {
+                setMessage('Please fill out all fields')
+            }
+            if (isNaN(yearsOfExperience) || yearsOfExperience < 0) {
+                setMessage('Please enter a valid number for years of experience')
+            }
             await nannyNetClient.registerNanny(firstName, lastName, email, password, yearsOfExperience)
             setMessage('Successfully registered!')
             router.push('/login')
