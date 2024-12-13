@@ -7,23 +7,23 @@ import { verifyPassword } from '@/lib/hash-password';
 export async function POST(request: NextRequest) {
     try {
         const body = await request.json()
-        // Convert the ID to a number if your database uses numeric IDs
+        // Get email & password from body
         const nannyEmail = body.email
         const nannyPassword = body.password
       
-        console.log(nannyEmail, nannyPassword)
-        // Query for a specific nanny by ID
+        // Query for nanny by email
         const nanny = await db
             .select()
             .from(NannyTable)
             .where(eq(NannyTable.email, nannyEmail))
             .limit(1)
-        console.log(nanny)
+
         try {
             //verify password with hashed password in DB
             const result = await verifyPassword(nannyPassword, nanny[0].password)
             if(result)  {
-                return NextResponse.json(true, {status: 201}) 
+                console.log("made it!")
+                return NextResponse.json(true, {status: 201})
             } else {
                 return NextResponse.json(false, {status: 401})
             }

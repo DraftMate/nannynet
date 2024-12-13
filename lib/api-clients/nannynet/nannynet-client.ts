@@ -64,37 +64,40 @@ class NannyNetClient {
     }
 
     async jsonFetch(url: string, init: RequestInit = {method: 'GET'}) {
+        let response
         try {
-            const response = await fetch(`${this.host}${url}`, {
+            response = await fetch(`${this.host}${url}`, {
                 ...init,
                 headers: this.getDefaultHeaders()
             })
-            if(response.status == 200) {
-                // success
-                let bodyText
-                try {
-                    bodyText = await response.text()
-                } catch (err) {
-                    throw new NetworkError('network error: receiving body', { url })
-                }
-                try {
-                    const bodyJSON = JSON.parse(bodyText)
-                    return bodyJSON;
-                } catch (err) {
-                    throw new JSONParseError('json parse error', { bodyText })
-                }
-            } else {
-                // failure, check status code
-                throw new StatusCodeError(response.statusText ?? "status code error", { status: response.status, url })
-            }
         } catch(err) {
             // network error
             // TODO: retry
-            throw new NetworkError('network error', { url })
+            throw NetworkError.wrap(err as any, 'network error', { url })
+        }
+
+        if (!response.ok) {
+            // failure, check status code
+            throw new StatusCodeError(response.statusText ?? "status code error", { status: response.status, url })
+        }
+
+        // success
+        let bodyText
+        try {
+            bodyText = await response.text()
+        } catch (err) {
+            throw NetworkError.wrap(err as any, 'network error: receiving body', { url })
+        }
+        try {
+            const bodyJSON = JSON.parse(bodyText)
+            return bodyJSON;
+        } catch (err) {
+            throw JSONParseError.wrap(err as any, 'json parse error', { bodyText })
         }
     }
 
     async jsonPost(url: string, body: {}, init: Omit<RequestInit, 'body' | 'method'> = {}) {
+        console.log(body)
         return this.jsonFetch(url, {
             ...init,
             method: 'POST',
@@ -211,13 +214,7 @@ class NannyNetClient {
     }
 
     async login(email: string, password: string) {
-        try {
-            const result = await this.jsonPost(`/auth/login/`, {email, password})
-            return result;
-        } catch(err) {
-            throw new DataParserError('Failed to login', {property: 'email', value: email})
-        }
-
+        return this.jsonPost(`/auth/login/`, {email, password})
     }
 
 }

@@ -20,8 +20,10 @@ export default function LoginPage() {
             } else {
                 setMessage('Incorrect email or password, please try again.')
             }
-        } catch (err) {
-            console.log(err)
+        } catch (e: any) {
+            const err = e as Error
+            console.log(err.stack)
+            alert(err.message)
         }
     }
 

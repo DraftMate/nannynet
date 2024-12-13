@@ -20,8 +20,7 @@ export async function POST(request: NextRequest) {
         yearsOfExperience: body.yearsOfExperience
       })
       .returning();
-      
-    console.log(newNanny)
+
     return NextResponse.json(newNanny[0], { status: 201 });
   } catch (error) {
     console.error('Error creating nanny:', error);
