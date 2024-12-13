@@ -1,8 +1,11 @@
 import { sign, verify, decode, JwtPayload } from 'jsonwebtoken';
-const ACCESS_SECRET_KEY = process.env.ACESS_SECRET_KEY as string;
-const REFRESH_SECRET_KEY = process.env.REFRESH_SECRET_KEY as string;
-const JWT_AUDIENCE = process.env.JWT_AUDIENCE as string;
-const JWT_ISSUER = process.env.JWT_ISSUER as string;
+import { get } from 'env-var'
+const ACCESS_SECRET_KEY = get('ACCESS_SECRET_KEY').required().asString()
+const REFRESH_SECRET_KEY = get('REFRESH_SECRET_KEY').required().asString()
+// const JWT_AUDIENCE = process.env.JWT_AUDIENCE as string;
+// const JWT_ISSUER = process.env.JWT_ISSUER as string;
+
+
 
 interface TokenPayload extends JwtPayload {
     userId: string,
@@ -11,6 +14,8 @@ interface TokenPayload extends JwtPayload {
 }
 //create Access and Refresh Token
 export const createAccessToken = (payLoad: TokenPayload) => {
+    console.log('Why are you empty', ACCESS_SECRET_KEY)
+    console.log(REFRESH_SECRET_KEY)
     return sign(payLoad, ACCESS_SECRET_KEY, {
         expiresIn: '15m',
         algorithm: 'HS256',

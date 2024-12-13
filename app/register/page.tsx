@@ -34,9 +34,9 @@ export default function RegistrationPage() {
         <div>
             <h4>Registration Page</h4>
             <div>
-                <Input className="my-2" placeholder="Enter your First Name" value={firstName} onChange={(e) => setFirstName(e.target.value)} />
-                <Input className="my-2" placeholder="Enter your Last Name" value={lastName} onChange={(e) => setLastName(e.target.value)} />
-                <Input className="my-2" placeholder="Enter your email" value={email} onChange={(e) => setEmail(e.target.value)} />
+                <Input className="my-2" autoComplete="given-name" placeholder="Enter your First Name" value={firstName} onChange={(e) => setFirstName(e.target.value)} />
+                <Input className="my-2" autoComplete="family-name" placeholder="Enter your Last Name" value={lastName} onChange={(e) => setLastName(e.target.value)} />
+                <Input className="my-2" autoComplete="email" type="email" placeholder="Enter your email" value={email} onChange={(e) => setEmail(e.target.value)} />
                 <Input className="my-2" type="password" placeholder="Enter your password" value={pass} onChange={(e) => setPassWord(e.target.value)} />
                 <Input className="my-2" placeholder="Enter years of experience" value={yearsOfExperience} onChange={(e) => setYearsOfExperience(e.target.value)} />
             </div>

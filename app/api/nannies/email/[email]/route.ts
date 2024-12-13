@@ -1,13 +1,13 @@
 // src/app/api/nannies/email/[email]/route.ts
 import { db } from '@/drizzle/db';
 import { NannyTable } from '@/drizzle/schema';
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { eq } from 'drizzle-orm';
 import { verifyPassword } from '@/lib/hash-password';
 
 // Get nanny by email
 export async function GET(
-    request: Request,
+    request: NextRequest,
     { params }: { params: { email: string } }
   ) {
     try {

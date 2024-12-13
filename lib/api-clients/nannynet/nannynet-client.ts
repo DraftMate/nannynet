@@ -41,8 +41,8 @@ class NannyNetClient {
     host: string
     defaultHeaders: Headers
     auth: {
-        accessToken: string
-        refreshToken: string
+        accessToken: string | null
+        refreshToken: string | null
     } | undefined
     constructor() {
         this.host = '/api';
@@ -106,7 +106,9 @@ class NannyNetClient {
     }
 
     async fetchNannies() {
-        const nannies: Nanny[] = await this.jsonFetch('/nannies')
+        
+        this.auth =  { accessToken:localStorage.getItem('accessToken'), refreshToken: "" }
+        const nannies: Nanny[] = await this.jsonFetch('/nannies', {})
         console.log(nannies)
         nannies.forEach(nanny => {
             if(nanny.id == null) {
@@ -195,21 +197,9 @@ class NannyNetClient {
             createdAt: new Date()
         }
         console.log(nanny)
-        //Check if nanny properties are valid
-        //this.nannyTypeCheck(nanny)
-        //Check if email already exists
-        const response = await this.jsonFetch(`/nannies/email/${email}`)
-        console.log(response)
-        if(response.length > 0) {
-            throw new DataParserError('email already exists', {property: 'email', value: email})
-        }
-        try { 
-            return await this.jsonPost('/auth/register/', nanny)
-        }
-        catch(err) {
-            throw new DataParserError('error hashing password', {property: 'password', value: password})
-        }
-
+        const data = await this.jsonPost('/auth/register/', nanny)
+        
+        return data
 
     }
 

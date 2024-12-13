@@ -70,7 +70,7 @@ export const AuthTable = pgTable(
   'auth',
   {
     id: uuid('id').primaryKey().defaultRandom(),
-    nannyId: uuid('id').notNull().references(() => NannyTable.id, { onDelete: 'cascade' }),
+    nannyId: uuid('nannyId').notNull().references(() => NannyTable.id, { onDelete: 'cascade' }),
     email: text('email').notNull(),
     refreshTokenVersion: integer('refreshTokenVersion').notNull(),
     refreshToken: text('refreshToken').notNull(),
