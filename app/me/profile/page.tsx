@@ -33,8 +33,8 @@ export default function NannyManagementPage() {
 
         async function fetchNanny() {
             try {
-                const nannies = await nannyNetClient.fetchLoggedInNanny()
-                setNannyData(nannies)
+                const nanny = await nannyNetClient.fetchLoggedInNanny()
+                setNannyData(nanny)
                 setIsLoading(false)
             } catch (error) {
                 console.log(error)

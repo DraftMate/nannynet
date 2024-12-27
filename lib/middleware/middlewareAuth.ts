@@ -11,7 +11,8 @@ export async function checkAuth(request: NextRequest) {
   req.context = {
     userId: '',
     userEmail: '',
-    isAuthorized: false
+    version: 0,
+    isAuthorized: false,
   };
 
   // Validate authentication
@@ -21,34 +22,34 @@ export async function checkAuth(request: NextRequest) {
   if (accessToken) {
     // Verify token and set context
     let tokenPayload = verifyToken(accessToken, false)
+    console.log('this is my tokenPayload from verifyToken', tokenPayload)
     if(!tokenPayload?.userId) {
       return NextResponse.json( {
-        error: "Not authorized"
+        error: "No userId found"
       }, {status: 401} )
     }
     if(!tokenPayload.userEmail) {
       return NextResponse.json( {
-          error: "User not found"
+          error: "No user email found"
       }, {status: 401})
     }
-    if(!tokenPayload.isAuthorized) {
+    if(!tokenPayload.version) {
       return NextResponse.json( {
-          error: "User email not found"
+          error: "No version found"
       }, {status: 401})
     }
     if(tokenPayload != null) {
         req.context.userId = tokenPayload.userId; // Get from token verification
         req.context.userEmail = tokenPayload.userEmail;
+        req.context.version = tokenPayload.version
         req.context.isAuthorized = true
     } 
     console.log('payload after calling middleware', tokenPayload)
     console.log(req.context)
-    
+    return tokenPayload;
   } else {
     return NextResponse.json( {
         error: "No Access Token" }, {status: 401}
     )
   }
-
-  return NextResponse.next();
 }

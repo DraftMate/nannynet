@@ -17,8 +17,8 @@ export async function GET(request: RequestWithContext) {
     .from(NannyTable)
     .where(eq(NannyTable.id, request.context.userId))
     .limit(1);
-
-    return NextResponse.json(nannies);
+    
+    return NextResponse.json(nannies[0]);
   } catch (error) {
     console.error('Error fetching nannies:', error);
     return NextResponse.json(

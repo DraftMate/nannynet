@@ -234,7 +234,3 @@ class NannyNetClient {
 // export singleton
 export default new NannyNetClient();
 
-export const login = async (email: string, password: string) => {
-
-}
-
