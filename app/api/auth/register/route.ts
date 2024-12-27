@@ -4,6 +4,7 @@ import { NannyTable, AuthTable } from '@/drizzle/schema';
 import { NextResponse, NextRequest } from 'next/server';
 import { hashPassword } from '@/lib/hash-password';
 import { createAccessToken, createRefreshToken} from '@/lib/auth';
+import { RequestWithContext } from '@/lib/types/request';
 import BaseError from '@/lib/base-error'
 
 type RegisterInput = {
@@ -14,7 +15,7 @@ type RegisterInput = {
   yearsOfExperience: number
 }
 
-export async function POST(request: NextRequest) {
+export async function POST(request: RequestWithContext) {
   let body: { 
     email?: string | undefined,
     password?: string | undefined,
@@ -110,6 +111,11 @@ export async function POST(request: NextRequest) {
       throw BaseError.wrap(err, 'failed to insert auth for nanny', { input, status: 500 })
     });
 
+    request.context = {
+      userId: newNanny.id,
+      userEmail: newNanny.email,
+      isAuthorized: true
+    }
     return NextResponse.json({
       nanny: newNanny,
       accessToken,

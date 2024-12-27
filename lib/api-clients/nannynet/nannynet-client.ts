@@ -8,7 +8,6 @@ class StatusCodeError extends BaseError<{status: number, url: string}> {}
 class NetworkError extends BaseError<{ url: string }> {}
 class JSONParseError extends BaseError<{ bodyText?: string }> {}
 class DataParserError extends BaseError<{ property: string, value: any }> {}
-class RegistrationError extends BaseError<{ email: string }> {}
 
 
 export interface Nanny {
@@ -107,7 +106,7 @@ class NannyNetClient {
 
     async fetchNannies() {
         
-        this.auth =  { accessToken:localStorage.getItem('accessToken'), refreshToken: "" }
+        //this.auth =  { accessToken:localStorage.getItem('accessToken'), refreshToken: "" }
         const nannies: Nanny[] = await this.jsonFetch('/nannies', {})
         console.log(nannies)
         nannies.forEach(nanny => {
@@ -118,6 +117,11 @@ class NannyNetClient {
         })
         
         return nannies
+    }
+
+    async fetchLoggedInNanny() {
+        const nanny: Nanny = await this.jsonFetch('/me/profile', {});
+        return nanny;
     }
 
     nannyTypeCheck(nanny: Nanny) {
@@ -147,6 +151,12 @@ class NannyNetClient {
         workHistories.forEach(workHistory => this.workHistoryTypeChecker(workHistory))
         return workHistories
     }
+
+    async fetchLogginedInWorkHistory() {
+        const workHistories: workHistory[] = await this.jsonFetch('/me/work-history')
+        workHistories.forEach(workHistory => this.workHistoryTypeChecker(workHistory))
+        return workHistories
+    }
     
     workHistoryTypeChecker(workHistory: workHistory) {
         if(workHistory.id == null) {
@@ -165,6 +175,12 @@ class NannyNetClient {
             throw new DataParserError('no nanny id found')
         }
         const recommendations: Recommendations[] = await this.jsonFetch(`/nannies/${nannyId}/recommendations`)
+        recommendations.forEach(recommendation => this.recommendationTypeChecker(recommendation))
+        return recommendations
+    }
+
+    async fetchLoggedInRecommendations() {
+        const recommendations: Recommendations[] = await this.jsonFetch('/me/recommendations')
         recommendations.forEach(recommendation => this.recommendationTypeChecker(recommendation))
         return recommendations
     }
@@ -199,6 +215,12 @@ class NannyNetClient {
         console.log(nanny)
         const data = await this.jsonPost('/auth/register/', nanny)
         
+        //Add accessToken & Refresh Token 
+        this.auth = {
+            accessToken: data.accessToken,
+            refreshToken: data.refreshToken
+        }
+        localStorage.setItem('accessToken', this.auth.accessToken!)
         return data
 
     }

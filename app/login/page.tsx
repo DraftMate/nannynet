@@ -16,7 +16,7 @@ export default function LoginPage() {
             //Successful login
             if (response == true) {
                 setMessage('Successfully logged in!')
-                router.push('/')
+                router.push('/me/profile/')
             } else {
                 setMessage('Incorrect email or password, please try again.')
             }
